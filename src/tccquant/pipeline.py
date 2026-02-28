@@ -3,13 +3,13 @@ from __future__ import annotations
 import json
 
 from .onnx_parser import parse_onnx_model
-from .passes import CalibrationPass, ErrorAnalysisPass, PassManager, QuantContext, W8A8QuantPass
+from .passes import CalibrationPass, ErrorAnalysisPass, PassManager, QuantContext, QuantOpReplacementPass, WeightQuantPass
 
 
 def run_w8a8_pipeline(model_path: str, calibration_data: dict[str, object]) -> QuantContext:
     model = parse_onnx_model(model_path)
     ctx = QuantContext(model=model, calibration_data=calibration_data)
-    manager = PassManager([CalibrationPass(), W8A8QuantPass(), ErrorAnalysisPass()])
+    manager = PassManager([WeightQuantPass(), CalibrationPass(), QuantOpReplacementPass(), ErrorAnalysisPass()])
     return manager.run(ctx)
 
 

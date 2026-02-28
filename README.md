@@ -13,8 +13,9 @@
 
 ## PPQ 风格 Pass 流程
 
-- `CalibrationPass`：统计 calibration tensor 范围
-- `W8A8QuantPass`：执行 W8A8 量化参数生成
+- `WeightQuantPass`：先逐层对权重做 W8 per-channel 量化
+- `CalibrationPass`：再逐层基于 weight quant 结果做激活校准
+- `QuantOpReplacementPass`：按 OP 方案替换为 `QuantLinear` / `QuantRMSNorm` 并携带量化参数
 - `ErrorAnalysisPass`：逐 OP 计算量化误差
 
 ## 快速开始

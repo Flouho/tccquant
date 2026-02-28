@@ -26,12 +26,22 @@ class Model:
 
 
 @dataclass
-class TensorQuantState:
+class QuantParam:
     scale: list[float]
     zero_point: list[int]
     bitwidth: int
     granularity: str
     scheme: str
+
+
+@dataclass
+class OpQuantConfig:
+    op_name: str
+    op_type: str
+    input_q: QuantParam | None = None
+    weight_q: QuantParam | None = None
+    bias_q: QuantParam | None = None
+    output_q: QuantParam | None = None
 
 
 @dataclass
