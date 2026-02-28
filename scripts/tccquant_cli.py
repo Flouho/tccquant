@@ -46,7 +46,7 @@ def cmd_w8a8(args: argparse.Namespace) -> None:
         calibration_data = json.load(f)
     ctx = run_w8a8_pipeline(args.model, calibration_data)
     save_error_report(ctx, args.report)
-    print(f"quantized tensors: {len(ctx.quant_states)}")
+    print(f"quantized ops: {len(ctx.op_quant_configs)}")
     print(f"op error entries: {len(ctx.op_errors)}")
     print(f"report saved to {args.report}")
     if args.export_onnx:
