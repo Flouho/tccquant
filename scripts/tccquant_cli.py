@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import random
 
 from tccquant.config import QuantGranularity, QuantScheme, QuantSpec
 from tccquant.graph_editor import NodeAnchor, QDQGraphEditor
+from tccquant.pipeline import run_w8a8_pipeline, save_error_report
 from tccquant.ppq_cleanup import prune_ppq_tree
 
 
@@ -39,6 +41,16 @@ def cmd_insert(args: argparse.Namespace) -> None:
     print(f"saved to {args.output}")
 
 
+def cmd_w8a8(args: argparse.Namespace) -> None:
+    with open(args.calibration_json, "r", encoding="utf-8") as f:
+        calibration_data = json.load(f)
+    ctx = run_w8a8_pipeline(args.model, calibration_data)
+    save_error_report(ctx, args.report)
+    print(f"quantized tensors: {len(ctx.quant_states)}")
+    print(f"op error entries: {len(ctx.op_errors)}")
+    print(f"report saved to {args.report}")
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="tccquant CLI")
     sub = p.add_subparsers(required=True)
@@ -61,6 +73,12 @@ def build_parser() -> argparse.ArgumentParser:
     ins.add_argument("--calib-shape", nargs="+", type=int, default=[1, 8])
     ins.add_argument("--prefix")
     ins.set_defaults(func=cmd_insert)
+
+    w8a8 = sub.add_parser("run-w8a8")
+    w8a8.add_argument("--model", required=True, help="onnx model path")
+    w8a8.add_argument("--calibration-json", required=True, help="json file: tensor_name -> tensor values")
+    w8a8.add_argument("--report", required=True, help="output error report json")
+    w8a8.set_defaults(func=cmd_w8a8)
 
     return p
 

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tccquant"
-version = "0.1.0"
-description = "PPQ-compatible quantization delivery toolkit with flexible Q-DQ graph surgery"
+version = "0.2.0"
+description = "PPQ-compatible quantization delivery toolkit with ONNX parsing, pass-based quantization, and error analysis"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
@@ -13,6 +13,10 @@ dependencies = []
 [project.optional-dependencies]
 test = [
   "pytest>=7.0.0",
+]
+onnx = [
+  "onnx>=1.15.0",
+  "numpy>=1.24.0",
 ]
 
 [tool.pytest.ini_options]
