@@ -13,7 +13,8 @@ from .passes import (
     QuantOpReplacementPass,
     ErrorAnalysisPass,
 )
-from .pipeline import run_w8a8_pipeline, save_error_report
+from .pipeline import run_w8a8_pipeline, save_error_report, export_quantized_onnx
+from .exporter import export_model_to_onnx
 
 __all__ = [
     "QuantGranularity",
@@ -34,4 +35,6 @@ __all__ = [
     "ErrorAnalysisPass",
     "run_w8a8_pipeline",
     "save_error_report",
+    "export_quantized_onnx",
+    "export_model_to_onnx",
 ]

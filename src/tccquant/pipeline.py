@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from .onnx_parser import parse_onnx_model
+from .exporter import export_model_to_onnx
 from .passes import CalibrationPass, ErrorAnalysisPass, PassManager, QuantContext, QuantOpReplacementPass, WeightQuantPass
 
 
@@ -28,3 +29,7 @@ def save_error_report(ctx: QuantContext, output_path: str) -> None:
     }
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
+
+
+def export_quantized_onnx(ctx: QuantContext, output_path: str) -> None:
+    export_model_to_onnx(ctx.model, output_path)

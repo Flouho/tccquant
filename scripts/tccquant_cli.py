@@ -7,7 +7,7 @@ import random
 
 from tccquant.config import QuantGranularity, QuantScheme, QuantSpec
 from tccquant.graph_editor import NodeAnchor, QDQGraphEditor
-from tccquant.pipeline import run_w8a8_pipeline, save_error_report
+from tccquant.pipeline import run_w8a8_pipeline, save_error_report, export_quantized_onnx
 from tccquant.ppq_cleanup import prune_ppq_tree
 
 
@@ -49,6 +49,9 @@ def cmd_w8a8(args: argparse.Namespace) -> None:
     print(f"quantized tensors: {len(ctx.quant_states)}")
     print(f"op error entries: {len(ctx.op_errors)}")
     print(f"report saved to {args.report}")
+    if args.export_onnx:
+        export_quantized_onnx(ctx, args.export_onnx)
+        print(f"quantized onnx exported to {args.export_onnx}")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -78,6 +81,7 @@ def build_parser() -> argparse.ArgumentParser:
     w8a8.add_argument("--model", required=True, help="onnx model path")
     w8a8.add_argument("--calibration-json", required=True, help="json file: tensor_name -> tensor values")
     w8a8.add_argument("--report", required=True, help="output error report json")
+    w8a8.add_argument("--export-onnx", help="optional: export quantized model ONNX with QuantLinear/QuantRMSNorm nodes")
     w8a8.set_defaults(func=cmd_w8a8)
 
     return p

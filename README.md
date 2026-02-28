@@ -10,6 +10,7 @@
 - 预设策略：W4A16、W4A8、W8A8、W8A16
 - 基于 calibration data 的完整 W8A8 量化流程（weight per-channel + activation per-tensor）
 - 全网 OP 级量化误差分析（MSE / MAE / MaxAbs）
+- 支持导出量化后的 ONNX（包含 QuantLinear / QuantRMSNorm 节点）
 
 ## PPQ 风格 Pass 流程
 
@@ -54,7 +55,8 @@ python scripts/tccquant_cli.py insert-qdq \
 python scripts/tccquant_cli.py run-w8a8 \
   --model model.onnx \
   --calibration-json calibration.json \
-  --report error_report.json
+  --report error_report.json \
+  --export-onnx quantized_model.onnx
 ```
 
 ## 目录
