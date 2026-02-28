@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import random
+
+from tccquant.config import QuantGranularity, QuantScheme, QuantSpec
+from tccquant.graph_editor import NodeAnchor, QDQGraphEditor
+from tccquant.ppq_cleanup import prune_ppq_tree
+
+
+def _random_tensor(shape: list[int]):
+    if len(shape) == 1:
+        return [random.uniform(-1, 1) for _ in range(shape[0])]
+    if len(shape) == 2:
+        return [[random.uniform(-1, 1) for _ in range(shape[1])] for _ in range(shape[0])]
+    raise ValueError("Only 1D/2D calib-shape is supported in minimal CLI")
+
+
+def cmd_prune(args: argparse.Namespace) -> None:
+    removed = prune_ppq_tree(args.ppq_root, dry_run=args.dry_run)
+    print(f"matched {len(removed)} paths")
+    for p in removed:
+        print(p)
+
+
+def cmd_insert(args: argparse.Namespace) -> None:
+    editor = QDQGraphEditor.from_path(args.model)
+    spec = QuantSpec(
+        bits=args.bits,
+        granularity=QuantGranularity(args.granularity),
+        scheme=QuantScheme(args.scheme),
+        axis=args.axis,
+        group_size=args.group_size,
+    )
+    calib = _random_tensor(args.calib_shape)
+    editor.insert_qdq_after(NodeAnchor(args.node, args.output_index), calib, spec, prefix=args.prefix)
+    editor.save(args.output)
+    print(f"saved to {args.output}")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(description="tccquant CLI")
+    sub = p.add_subparsers(required=True)
+
+    prune = sub.add_parser("prune-ppq")
+    prune.add_argument("ppq_root")
+    prune.add_argument("--dry-run", action="store_true")
+    prune.set_defaults(func=cmd_prune)
+
+    ins = sub.add_parser("insert-qdq")
+    ins.add_argument("--model", required=True)
+    ins.add_argument("--output", required=True)
+    ins.add_argument("--node", required=True)
+    ins.add_argument("--output-index", type=int, default=0)
+    ins.add_argument("--bits", type=int, default=8)
+    ins.add_argument("--granularity", default="per-tensor", choices=[g.value for g in QuantGranularity])
+    ins.add_argument("--scheme", default="symmetric", choices=[s.value for s in QuantScheme])
+    ins.add_argument("--axis", type=int, default=0)
+    ins.add_argument("--group-size", type=int)
+    ins.add_argument("--calib-shape", nargs="+", type=int, default=[1, 8])
+    ins.add_argument("--prefix")
+    ins.set_defaults(func=cmd_insert)
+
+    return p
+
+
+def main() -> None:
+    parser = build_parser()
+    args = parser.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()
